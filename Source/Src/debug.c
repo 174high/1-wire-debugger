@@ -1,4 +1,5 @@
 #include "stm32f0xx_hal.h"
+#include <stdbool.h>
 
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart1;
@@ -34,19 +35,63 @@ int _write(int file,char *ptr, int len)
 
 #endif
 
+bool Host=false ;
 
-void test(void)
+void Change_Status(void)
 {
 
-    
-    printf("test \r\n");
+    if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13))
+    {
+	 HAL_Delay(300);
+
+         if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13))
+         {              
+	     printf("press \r\n");
+             HAL_Delay(1000);
+	     printf("time out \r\n");
+             if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13))
+             {
+	         printf("change \r\n");
+                 if(true==Host)
+	         { 
+		     Host=false  ;
+                     HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
+	         }
+                 else
+	         {
+                     Host=true ;
+	         }
+
+		 while(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13))
+			 ;
+              }
+
+	 }
+    }
+
+    if(Host==true)
+    {
+//	printf("toggling \r\n") ;
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(100);
+    }
 
 
 
 }
 
 
+void test(void)
+{
 
+    Change_Status();
+
+    
+
+
+
+
+}
 
 
 
