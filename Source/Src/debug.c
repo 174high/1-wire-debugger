@@ -36,6 +36,7 @@ int _write(int file,char *ptr, int len)
 #endif
 
 bool Host=false ;
+bool Start=false; 
 
 void Change_Status(void)
 {
@@ -60,6 +61,7 @@ void Change_Status(void)
                  else
 	         {
                      Host=true ;
+		     Start=true; 
 	         }
 
 		 while(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13))
@@ -80,15 +82,143 @@ void Change_Status(void)
 
 }
 
+/*******************************************************************************
+Description :                  Delay in uS.
+Inputs :
+Delay : Time in uS
+outputs :
+NONE
+********************************************************************************/
+void HAL_Delay_Us(__IO uint32_t Delay)
+{
+  for(int i=0;i<Delay*216;i++);
+}
 
 void test(void)
 {
 
     Change_Status();
 
+    bool      Init=false ; 
+    uint32_t  Count=0;  
+ 
+//    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+//    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
+
+    HAL_Delay_Us(120) ;
+
+    /*
+    if(Host==true)
+    {
+
+          HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+
+	  HAL_Delay_Us(50) ;
+
+	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+
+    }
+    else
+    {
+          while(Start==true)
+          {
+              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+		  printf(" init successfully \r\n") ;
+          }
+    }
+
+    */
+     //   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
     
+    /* 
+    if(Host==true)
+    {
+
+         printf("PB4=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4)); 
+
+//         HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+         HAL_Delay_Us(500) ;
+
+	 printf("PB4=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4));
+    }
+    else
+    {
+          HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);  
+          printf("PB10=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10));	  
+          HAL_Delay_Us(500) ;
+          HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_RESET);
+	  printf("PB10=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10));
+	  HAL_Delay_Us(500) ;
+    
+    }
+
+    */
 
 
+     
+
+    if(Host==true)    
+    {
+        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+        HAL_Delay_Us(2000) ;
+
+        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+        HAL_Delay_Us(120) ; 
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+        HAL_Delay_Us(40) ;
+
+	while(1)
+        {            
+            if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4))
+            {    
+                Init=true ;
+		printf(" init successfully \r\n") ; 
+	        break ; 	
+            }
+
+            Count++; 
+            HAL_Delay_Us(1) ;
+            if(Count>120)
+                break; 
+        } 
+
+    }
+    else
+    {		    
+	 if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10)) 
+         {
+	      HAL_Delay_Us(30) ;
+	  
+              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+              {
+
+		  HAL_Delay_Us(60) ;
+                  if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+                  {
+                       HAL_Delay_Us(10) ;
+
+                       if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+                       {                               
+                            HAL_Delay_Us(40) ;
+                                  
+                            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_RESET);
+
+		            HAL_Delay_Us(100) ;
+
+			    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
+
+			    printf("responce to master \r\n");
+			   
+		        } 
+		   }
+	      }
+	 
+	 } 
+    
+    
+    }
+
+    
 
 
 }
