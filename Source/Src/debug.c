@@ -224,7 +224,7 @@ char receive(bool On)
          if(Init_count>500)
          {
               printf("time out after init\r\n");
-                  break;
+              return ':' ; 
          }
 
     }
@@ -269,15 +269,17 @@ void test(void)
         Init_M=m_init();
 
 	HAL_Delay_Us(120) ;
-        if(Init_M==true)
+
+	if(Init_M==true)
         {
-	      printf("send data a\r\n");
-	      send_a_byte('a');
-	      printf("send data b\r\n"); 
-	      send_a_byte('b');
-              printf("send data end \r\n");
-              send_a_byte('\n');
-         }
+              char *data_send="hello:" ;
+              
+              while((*data_send)!=NULL)
+	      {
+	          send_a_byte(*data_send);
+	          data_send++; 
+              }
+        }
 
     }
     else
@@ -293,8 +295,8 @@ void test(void)
          {
              char data=receive(Init_S);
 	     printf("%c",data);
-             if(data=='\n')
-             {	
+             if(strcmp(data,':')==0)
+             {  
                  break; 		     
              }
 
@@ -302,6 +304,7 @@ void test(void)
 
 	 if(Init_S==true)
          {
+	     Init_S=false ;
              printf("end\r\n");
          }
 
