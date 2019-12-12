@@ -184,6 +184,24 @@ void test(void)
                 break; 
         } 
 
+	HAL_Delay_Us(120) ;
+
+         if(Init_M==true)
+         {
+	      printf("send data 1\r\n");
+              HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+              HAL_Delay_Us(15) ;
+              HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+              HAL_Delay_Us(45) ;
+
+	      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+              HAL_Delay_Us(3) ;
+
+         }
+
+
+
+
     }
     else
     {
@@ -224,14 +242,21 @@ void test(void)
          while(Init_S==true)
          {
               Init_count++; 
-              HAL_Delay(1) ;
+              HAL_Delay_Us(1) ;
 
-
-              
-
-
-
-              
+              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+              {
+		   Init_count=0; 
+                   HAL_Delay_Us(15) ;
+                   if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+                   {
+                       printf("read 0 \r\n");
+                   }
+                   else
+                   {
+                       printf("read 1 \r\n");
+                   }
+              }
 
 	      if(Init_count>500)
 	      {
