@@ -99,13 +99,15 @@ void test(void)
 
     Change_Status();
 
-    bool      Init=false ; 
+    bool      Init_M=false ; 
+    bool      Init_S=false ; 
     uint32_t  Count=0;  
+    uint32_t  Init_count=0; 
 
     if(Host==true)
     { 
         HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-	HAL_Delay_Us(2000) ;
+	HAL_Delay(2000) ;
     }
 
     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
@@ -171,7 +173,7 @@ void test(void)
         {            
             if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4))
             {    
-                Init=true ;
+                Init_M=true ;
 		printf(" init successfully \r\n") ; 
 	        break ; 	
             }
@@ -210,12 +212,35 @@ void test(void)
 			    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
 
 			    printf("responce to master \r\n");
-			   
+
+                            Init_S=true ; 
+
 		        } 
 		   }
 	      }
 	 
 	 } 
+
+         while(Init_S==true)
+         {
+              Init_count++; 
+              HAL_Delay(1) ;
+
+
+              
+
+
+
+              
+
+	      if(Init_count>500)
+	      {
+		  printf("time out after init\r\n");
+	          break;
+	      } 
+	 
+	 }
+
     
     
     }
