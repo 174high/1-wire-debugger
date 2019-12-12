@@ -149,7 +149,7 @@ bool s_init(void)
 }
 
 
-void send_a_byte(unsigned char data)
+void send_a_byte(char data)
 {
      unsigned char bit=0; 	
      	
@@ -182,10 +182,52 @@ void send_a_byte(unsigned char data)
      }
 }
 
-unsigned char receive(void)
+char receive(bool On)
 {
+    char data=0; 
+    uint32_t  Init_count=0;
+    unsigned char i=0; 
 
+    while(On==true)
+    {
+         Init_count++;
+         HAL_Delay(1) ;
 
+	 if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+         {
+                   HAL_Delay_Us(20) ;
+                   if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+                   {
+                       //printf("read 0 \r\n");
+                       data&=~(0x01<<i) ;
+		       i++; 
+                   }
+                   else
+                   {
+                       //printf("read 1 \r\n");
+                       data|=(0x01<<i);
+		       i++;
+                   }
+                   HAL_Delay_Us(40) ;
+
+		   //printf("data =%d \r\n",data);
+         }
+
+        // printf("data =%d \r\n",data);
+
+         if(i==8)
+         {   
+             //printf("data =%c \r\n",data); 
+             return data; 
+	 }
+
+         if(Init_count>500)
+         {
+              printf("time out after init\r\n");
+                  break;
+         }
+
+    }
 
 }
 
@@ -219,56 +261,8 @@ void test(void)
     }
 
     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
 
-    /*
-    if(Host==true)
-    {
-
-          HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
-
-	  HAL_Delay_Us(50) ;
-
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-
-    }
-    else
-    {
-          while(Start==true)
-          {
-              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
-		  printf(" init successfully \r\n") ;
-          }
-    }
-
-    */
-     //   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-    
-    /* 
-    if(Host==true)
-    {
-
-         printf("PB4=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4)); 
-
-//         HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
-         HAL_Delay_Us(500) ;
-
-	 printf("PB4=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4));
-    }
-    else
-    {
-          HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);  
-          printf("PB10=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10));	  
-          HAL_Delay_Us(500) ;
-          HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_RESET);
-	  printf("PB10=%d \r\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10));
-	  HAL_Delay_Us(500) ;
-    
-    }
-
-    */
-
-
-     
 
     if(Host==true)    
     {
@@ -277,51 +271,41 @@ void test(void)
 	HAL_Delay_Us(120) ;
         if(Init_M==true)
         {
-	      printf("send data 1\r\n");
-              send_a_byte(0x55); 
-
+	      printf("send data a\r\n");
+	      send_a_byte('a');
+	      printf("send data b\r\n"); 
+	      send_a_byte('b');
+              printf("send data end \r\n");
+              send_a_byte('\n');
          }
 
     }
     else
     {
+         Init_S=s_init();
 
-         Init_S=s_init(); 
-
-         while(Init_S==true)
+	 if(Init_S==true)
          {
-              Init_count++; 
-              HAL_Delay_Us(1) ;
-
-              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
-              {
-		   Init_count=0; 
-                   HAL_Delay_Us(15) ;
-                   if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
-                   {
-                       printf("read 0 \r\n");
-                   }
-                   else
-                   {
-                       printf("read 1 \r\n");
-                   }
-		   HAL_Delay_Us(45) ;
-
-              }
-
-	      if(Init_count>500)
-	      {
-		  printf("time out after init\r\n");
-	          break;
-	      } 
-	 
+	     printf("rev:");
 	 }
 
-    
-    
-    }
+	 while(Init_S==true)
+         {
+             char data=receive(Init_S);
+	     printf("%c",data);
+             if(data=='\n')
+             {	
+                 break; 		     
+             }
 
-    
+     	 }
+
+	 if(Init_S==true)
+         {
+             printf("end\r\n");
+         }
+
+    }
 
 
 }
