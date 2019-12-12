@@ -101,11 +101,14 @@ void test(void)
 
     bool      Init=false ; 
     uint32_t  Count=0;  
- 
-//    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-//    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
 
-    HAL_Delay_Us(120) ;
+    if(Host==true)
+    { 
+        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+	HAL_Delay_Us(2000) ;
+    }
+
+    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
 
     /*
     if(Host==true)
@@ -159,9 +162,6 @@ void test(void)
 
     if(Host==true)    
     {
-        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-        HAL_Delay_Us(2000) ;
-
         HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
         HAL_Delay_Us(120) ; 
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
@@ -184,7 +184,9 @@ void test(void)
 
     }
     else
-    {		    
+    {
+
+
 	 if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10)) 
          {
 	      HAL_Delay_Us(30) ;
