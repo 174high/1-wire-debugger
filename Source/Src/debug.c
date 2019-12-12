@@ -82,6 +82,114 @@ void Change_Status(void)
 
 }
 
+bool m_init(void) 
+{
+    uint32_t  Count=0;
+
+    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+    HAL_Delay_Us(120) ;
+    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+    HAL_Delay_Us(40) ;
+
+    while(1)
+    {
+        if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4))
+        {
+            printf(" init successfully \r\n") ;
+            return true ;
+         }
+
+         Count++;
+         HAL_Delay_Us(1) ;
+         if(Count>120)
+         break;
+     }
+
+
+     return false ; 
+}
+
+bool s_init(void)
+{
+
+    if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+    {
+              HAL_Delay_Us(30) ;
+
+              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+              {
+
+                  HAL_Delay_Us(60) ;
+                  if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+                  {
+                       HAL_Delay_Us(10) ;
+
+                       if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+                       {
+                            HAL_Delay_Us(40) ;
+
+                            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_RESET);
+
+                            HAL_Delay_Us(100) ;
+
+                            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
+
+                            printf("responce to master \r\n");
+
+                            return true ;
+
+                        }
+                   }
+              }
+
+     }
+
+     return false; 
+
+}
+
+
+void send_a_byte(unsigned char data)
+{
+     unsigned char bit=0; 	
+     	
+     for(unsigned char i=0;i<8;i++)
+     {
+//	 printf("data=%d \r\n",data);
+         bit=data&(0x01<<i) ;
+
+         if(bit>0)
+         {
+             printf("send bit 1\r\n");
+             HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+             HAL_Delay_Us(15) ;
+             HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+             HAL_Delay_Us(45) ;
+         }
+	 else
+         {
+             printf("send bit 0\r\n");
+	     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+             HAL_Delay_Us(15) ;
+             HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
+             HAL_Delay_Us(45) ;
+	 
+	 }
+
+         HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
+         HAL_Delay_Us(3) ;
+
+     }
+}
+
+unsigned char receive(void)
+{
+
+
+
+}
+
+
 /*******************************************************************************
 Description :                  Delay in uS.
 Inputs :
@@ -164,80 +272,21 @@ void test(void)
 
     if(Host==true)    
     {
-        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
-        HAL_Delay_Us(120) ; 
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-        HAL_Delay_Us(40) ;
-
-	while(1)
-        {            
-            if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4))
-            {    
-                Init_M=true ;
-		printf(" init successfully \r\n") ; 
-	        break ; 	
-            }
-
-            Count++; 
-            HAL_Delay_Us(1) ;
-            if(Count>120)
-                break; 
-        } 
+        Init_M=m_init();
 
 	HAL_Delay_Us(120) ;
-
-         if(Init_M==true)
-         {
+        if(Init_M==true)
+        {
 	      printf("send data 1\r\n");
-              HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
-              HAL_Delay_Us(15) ;
-              HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-              HAL_Delay_Us(45) ;
-
-	      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-              HAL_Delay_Us(3) ;
+              send_a_byte(0x55); 
 
          }
-
-
-
 
     }
     else
     {
 
-
-	 if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10)) 
-         {
-	      HAL_Delay_Us(30) ;
-	  
-              if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
-              {
-
-		  HAL_Delay_Us(60) ;
-                  if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
-                  {
-                       HAL_Delay_Us(10) ;
-
-                       if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
-                       {                               
-                            HAL_Delay_Us(40) ;
-                                  
-                            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_RESET);
-
-		            HAL_Delay_Us(100) ;
-
-			    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
-
-			    printf("responce to master \r\n");
-
-                            Init_S=true ; 
-
-		        } 
-		   }
-	      }
-	 
-	 } 
+         Init_S=s_init(); 
 
          while(Init_S==true)
          {
@@ -256,6 +305,8 @@ void test(void)
                    {
                        printf("read 1 \r\n");
                    }
+		   HAL_Delay_Us(45) ;
+
               }
 
 	      if(Init_count>500)
