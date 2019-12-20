@@ -109,12 +109,50 @@ bool m_init(void)
      return false ; 
 }
 
+bool s_init_v2(void)
+{
+    int i=0; 
+    bool next=false; 
+
+    if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+    {
+
+        while(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+        {
+	    i++ ; 
+	    if(i>1000)
+            {
+                printf("i=%d \r\n",i);
+                return false ;
+            }
+	}
+
+        if(i>10&&i<100)
+        {
+                //printf("i=%d \r\n",i);
+                next=true ;
+        }
+
+        if(next==true)
+	{	 
+            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_RESET);
+            HAL_Delay_Us(50) ;
+//            printf("init v2 i=%d \r\n",i);
+            return true ; 
+        }
+    }
+
+    return false ; 
+
+}
+
 bool s_init(void)
 {
 
     if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
     {
-              HAL_Delay_Us(30) ;
+
+	    HAL_Delay_Us(30) ;
 
               if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
               {
@@ -122,6 +160,7 @@ bool s_init(void)
                   HAL_Delay_Us(60) ;
                   if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
                   {
+//		       printf("1\r\n");
                        HAL_Delay_Us(10) ;
 
                        if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
@@ -182,6 +221,66 @@ void send_a_byte(char data)
      }
 }
 
+char receive_v2(bool On)
+{
+    char data=0;
+    uint32_t  Init_count=0;
+    unsigned char i=0,j=0;
+    unsigned char a[8]={0}; 
+
+    while(On==true)
+    {
+         Init_count++;
+         //HAL_Delay_Us(1) ;
+
+         j=0; 
+         while(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
+         {
+            j++ ;
+            if(j>1000)
+            {
+                printf("j=%d \r\n",j);
+                return false ;
+            }
+         }
+
+         if(j>6&&j<12)
+         {
+		   a[i]=j;
+//		   printf("0 j=%d \r\n",j);
+                   data&=~(0x01<<i) ;
+                   i++;
+         }
+         
+	 if(j>0&&j<6)
+         {
+               a[i]=j; 
+	       //    printf("1 j=%d \r\n",j);
+                   data|=(0x01<<i);
+                   i++;  
+	 }
+
+        // printf("data =%d \r\n",data);
+
+         if(i==8)
+         {
+//             printf("0=%d,1=%d,2=%d,3=%d,4=%d,5=%d,6=%d,7=%d \r\n",a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
+//	     printf("data =0x%x \r\n",data);
+             return data;
+         }
+
+         if(Init_count>50000)
+         {
+	      printf("e:0=%d,1=%d,2=%d,3=%d,4=%d,5=%d,6=%d,7=%d \r\n",a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
+//              printf("e:data =%d \r\n",data);
+	      //printf("time out Init_count=%d data=0x%x i=%d j=%d \r\n",Init_count,data,i,j);
+              return ':' ;
+         }
+
+    }
+
+}
+
 char receive(bool On)
 {
     char data=0; 
@@ -191,20 +290,20 @@ char receive(bool On)
     while(On==true)
     {
          Init_count++;
-         HAL_Delay(1) ;
+         HAL_Delay_Us(1) ;
 
 	 if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
          {
                    HAL_Delay_Us(20) ;
                    if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
                    {
-                       //printf("read 0 \r\n");
+                       printf("read 0 \r\n");
                        data&=~(0x01<<i) ;
 		       i++; 
                    }
                    else
                    {
-                       //printf("read 1 \r\n");
+                       printf("read 1 \r\n");
                        data|=(0x01<<i);
 		       i++;
                    }
@@ -217,13 +316,13 @@ char receive(bool On)
 
          if(i==8)
          {   
-             //printf("data =%c \r\n",data); 
+             printf("data =0x%x \r\n",data); 
              return data; 
 	 }
 
          if(Init_count>500)
          {
-              printf("time out after init\r\n");
+              printf("time out after init data=0x%x \r\n",data);
               return ':' ; 
          }
 
@@ -241,11 +340,18 @@ NONE
 ********************************************************************************/
 void HAL_Delay_Us(__IO uint32_t Delay)
 {
-  for(int i=0;i<Delay*216;i++);
+  for(int i=0;i<Delay*1;i++);
 }
 
 void test(void)
 {
+   /* while(1)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	
+	HAL_Delay_Us(1000000);
+    
+    }
+  */
 
     Change_Status();
 
@@ -262,7 +368,6 @@ void test(void)
 
     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
-
 
     if(Host==true)    
     {
@@ -284,17 +389,21 @@ void test(void)
     }
     else
     {
-         Init_S=s_init();
+         //Init_S=s_init();
+         Init_S=s_init_v2();
 
 	 if(Init_S==true)
          {
-	     printf("rev:");
+	  //   printf("r: \r\n");        
+              
 	 }
+
 
 	 while(Init_S==true)
          {
-             char data=receive(Init_S);
-	     printf("%c",data);
+//             char data=receive(Init_S);
+            char data=receive_v2(Init_S);
+    		 printf("%c\n",data);
              if(strcmp(data,':')==0)
              {  
                  break; 		     
@@ -305,8 +414,9 @@ void test(void)
 	 if(Init_S==true)
          {
 	     Init_S=false ;
-             printf("end\r\n");
+ //            printf("end\r\n");
          }
+
 
     }
 
