@@ -221,19 +221,23 @@ void send_a_byte(char data)
      }
 }
 
-char receive_v2(bool On)
+char receive_v2(void)
 {
     char data=0;
     uint32_t  Init_count=0;
     unsigned char i=0,j=0;
     unsigned char a[8]={0}; 
 
-    while(On==true)
+    if(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
     {
+         while(1)
+         {		
+
          Init_count++;
          //HAL_Delay_Us(1) ;
 
-         j=0; 
+         j=0;
+
          while(GPIO_PIN_RESET==HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10))
          {
             j++ ;
@@ -244,7 +248,7 @@ char receive_v2(bool On)
             }
          }
 
-         if(j>6&&j<12)
+         if(j>49&&j<100)
          {
 		   a[i]=j;
 //		   printf("0 j=%d \r\n",j);
@@ -252,7 +256,7 @@ char receive_v2(bool On)
                    i++;
          }
          
-	 if(j>0&&j<6)
+	 if(j>0&&j<50)
          {
                a[i]=j; 
 	       //    printf("1 j=%d \r\n",j);
@@ -274,10 +278,14 @@ char receive_v2(bool On)
 	      printf("e:0=%d,1=%d,2=%d,3=%d,4=%d,5=%d,6=%d,7=%d \r\n",a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
 //              printf("e:data =%d \r\n",data);
 	      //printf("time out Init_count=%d data=0x%x i=%d j=%d \r\n",Init_count,data,i,j);
-              return ':' ;
+              return '\n' ;
          }
 
+	 }
+
     }
+
+    return '\0' ;
 
 }
 
@@ -345,13 +353,14 @@ void HAL_Delay_Us(__IO uint32_t Delay)
 
 void test(void)
 {
-   /* while(1)
-    {
-        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	
-	HAL_Delay_Us(1000000);
-    
-    }
-  */
+//    while(1)
+//    {
+//        HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,GPIO_PIN_SET);
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);	
+//	HAL_Delay_Us(1000000);
+//    
+//    }
+  
 
     Change_Status();
 
@@ -389,34 +398,35 @@ void test(void)
     }
     else
     {
-         //Init_S=s_init();
-         Init_S=s_init_v2();
+         char data='\0';
+	 char data2='\0'; 
+         char data_one[20]; 
+	 char i=0;
+         int  j=0; 
 
-	 if(Init_S==true)
-         {
-	  //   printf("r: \r\n");        
-              
-	 }
-
-
-	 while(Init_S==true)
-         {
-//             char data=receive(Init_S);
-            char data=receive_v2(Init_S);
-    		 printf("%c\n",data);
-             if(strcmp(data,':')==0)
-             {  
-                 break; 		     
+         while(1)
+	 {
+             data=receive_v2();
+             
+	    // if(data!='\0')
+	    // printf("%c",data);
+	     if(data!='\0')
+             {		     
+		 data_one[i]=data;
+		 i++ ; 
+		 j=0; 
              }
+            
+             if(data=='\n')
+                 break; 
 
-     	 }
-
-	 if(Init_S==true)
-         {
-	     Init_S=false ;
- //            printf("end\r\n");
+	     j++; 
+	     if(j>5000)
+		 break; 
          }
 
+	 if(i>0) 
+	 printf("%s",data_one,i,j); 
 
     }
 
