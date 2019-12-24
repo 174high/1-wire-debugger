@@ -3,7 +3,9 @@
 
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart1;
-
+extern void HAL_Delay_Us(__IO uint32_t Delay);
+	
+	
 #if  KEIL
 
 int fputc(int ch, FILE *f)
@@ -247,8 +249,17 @@ char receive_v2(void)
                 return false ;
             }
          }
+				 
+//	    if(j>0)
+//         {
+//		   a[i]=j;
+//		   printf("0 j=%d \r\n",j);
+//                   data&=~(0x01<<i) ;
+//                   i++;
+//         }	   
+         
 
-         if(j>49&&j<100)
+         if(j>69&&j<120)
          {
 		   a[i]=j;
 //		   printf("0 j=%d \r\n",j);
@@ -256,7 +267,7 @@ char receive_v2(void)
                    i++;
          }
          
-	 if(j>0&&j<50)
+	 if(j>0&&j<70)
          {
                a[i]=j; 
 	       //    printf("1 j=%d \r\n",j);
@@ -276,8 +287,6 @@ char receive_v2(void)
          if(Init_count>50000)
          {
 	      printf("e:0=%d,1=%d,2=%d,3=%d,4=%d,5=%d,6=%d,7=%d \r\n",a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
-//              printf("e:data =%d \r\n",data);
-	      //printf("time out Init_count=%d data=0x%x i=%d j=%d \r\n",Init_count,data,i,j);
               return '\n' ;
          }
 
@@ -383,7 +392,7 @@ void test(void)
         Init_M=m_init();
 
 	HAL_Delay_Us(120) ;
-
+	
 	if(Init_M==true)
         {
               char *data_send="hello:" ;
@@ -400,9 +409,10 @@ void test(void)
     {
          char data='\0';
 	 char data2='\0'; 
-         char data_one[20]; 
+         char data_one[20]={0}; 
 	 char i=0;
          int  j=0; 
+
 
          while(1)
 	 {
@@ -426,7 +436,7 @@ void test(void)
          }
 
 	 if(i>0) 
-	 printf("%s",data_one,i,j); 
+	 printf("i=%d %s ",i,data_one); 
 
     }
 
