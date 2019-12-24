@@ -246,7 +246,7 @@ char receive_v2(void)
             if(j>1000)
             {
                 printf("j=%d \r\n",j);
-                return false ;
+							return '\0' ;
             }
          }
 				 
@@ -284,7 +284,7 @@ char receive_v2(void)
              return data;
          }
 
-         if(Init_count>50000)
+         if(Init_count>500)
          {
 	      printf("e:0=%d,1=%d,2=%d,3=%d,4=%d,5=%d,6=%d,7=%d \r\n",a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
               return '\n' ;
@@ -421,17 +421,20 @@ void test(void)
 	    // if(data!='\0')
 	    // printf("%c",data);
 	     if(data!='\0')
-             {		     
-		 data_one[i]=data;
-		 i++ ; 
-		 j=0; 
+             {		   
+                 if(i<20)
+                 {			 
+		     data_one[i]=data;
+		     i++ ; 
+		     j=0; 
+	         }
              }
             
              if(data=='\n')
                  break; 
 
 	     j++; 
-	     if(j>5000)
+	     if(j>500)
 		 break; 
          }
 
